@@ -1,6 +1,6 @@
 {
   "name": "@wyy-cli-dev/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "wyy-cli-dev core",
   "author": "wy5211 <1579151657@qq.com>",
   "homepage": "",
@@ -20,6 +20,6 @@
     "test": "echo Error: run tests from core"
   },
   "dependencies": {
-    "@wyy-cli-dev/utils": "^1.0.0"
+    "@wyy-cli-dev/utils": "^1.0.1"
   }
 }
