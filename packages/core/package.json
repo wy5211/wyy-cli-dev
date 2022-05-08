@@ -20,6 +20,11 @@
     "test": "echo Error: run tests from core"
   },
   "dependencies": {
-    "@wyy-cli-dev/utils": "^1.0.1"
+    "@wyy-cli-dev/utils": "file:../utils",
+    "dedent": "^0.7.0",
+    "yargs": "^17.4.1"
+  },
+  "bin": {
+    "wyy": "lib/core.js"
   }
 }
