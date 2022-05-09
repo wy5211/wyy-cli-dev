@@ -5,7 +5,7 @@
   "author": "wy5211 <1579151657@qq.com>",
   "homepage": "",
   "license": "ISC",
-  "main": "lib/core.js",
+  "main": "lib/index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -21,10 +21,12 @@
   },
   "dependencies": {
     "@wyy-cli-dev/utils": "file:../utils",
-    "dedent": "^0.7.0",
-    "yargs": "^17.4.1"
+    "colors": "^1.4.0",
+    "import-local": "^3.1.0",
+    "npmlog": "^6.0.2",
+    "semver": "^7.3.7"
   },
   "bin": {
-    "wyy": "lib/core.js"
+    "wyy": "bin/index.js"
   }
 }

@@ -1,8 +1,13 @@
 'use strict';
 
-module.exports = utils;
+const log = require('./log');
+
+module.exports = {
+  utils,
+  log,
+};
 
 function utils() {
-    // TODO
-    console.log("utils123")
+  // TODO
+  console.log('utils123');
 }
