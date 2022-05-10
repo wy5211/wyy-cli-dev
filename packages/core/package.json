@@ -22,9 +22,13 @@
   "dependencies": {
     "@wyy-cli-dev/utils": "file:../utils",
     "colors": "^1.4.0",
+    "dotenv": "^16.0.0",
     "import-local": "^3.1.0",
+    "minimist": "^1.2.6",
     "npmlog": "^6.0.2",
-    "semver": "^7.3.7"
+    "root-check": "1.0.0",
+    "semver": "^7.3.7",
+    "user-home": "2.0.0"
   },
   "bin": {
     "wyy": "bin/index.js"

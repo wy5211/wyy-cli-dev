@@ -1,5 +1,3 @@
 node_modules
 dist
-**/es
-**/lib
 __tests__

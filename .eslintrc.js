@@ -13,5 +13,6 @@ module.exports = {
     'no-unused-vars': 1,
     'comma-dangle': 0,
     'implicit-arrow-linebreak': 0,
+    'arrow-body-style': 0,
   },
 };

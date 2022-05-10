@@ -1,13 +1,13 @@
-'use strict';
-
 const log = require('./log');
-
-module.exports = {
-  utils,
-  log,
-};
+const npm = require('./npm');
 
 function utils() {
   // TODO
   console.log('utils123');
 }
+
+module.exports = {
+  utils,
+  log,
+  npm,
+};
