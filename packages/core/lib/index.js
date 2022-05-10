@@ -1,19 +1,22 @@
 const path = require('path');
 const semver = require('semver');
 const colors = require('colors/safe');
-
+const { Command } = require('commander');
 const userHome = require('user-home');
 const fs = require('fs');
 const { log, npm } = require('@wyy-cli-dev/utils');
+const init = require('@wyy-cli-dev/init');
 const pkg = require('../package.json');
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require('./const');
+
+const program = new Command();
 
 let config;
 
 async function checkGlobalUpdate() {
   // 1.获取npm包的历史版本；2.当前版本与历史最新版本进行对比；3.当前版本小于历史最新版本给出提示；
   const currentVersion = pkg.version;
-  const lastestVersion = await npm.getNpmLastestSemverVersion('qs' || NPM_NAME, currentVersion);
+  const lastestVersion = await npm.getNpmLastestSemverVersion(NPM_NAME, currentVersion);
   if (lastestVersion && semver.gt(lastestVersion, currentVersion)) {
     log.warn(
       colors.yellow(`请手动更新 ${NPM_NAME}，当前版本：${currentVersion}，最新版本：${lastestVersion}
@@ -94,15 +97,66 @@ function checkPkgVersion() {
   log.info('version', pkg.version);
 }
 
+function registerCommander() {
+  console.log('123');
+
+  // program
+  //   .option('-d, --debug', 'output extra debugging')
+  //   .option('-s, --small', 'small pizza size')
+  //   .option('-p, --pizza-type <type>', 'flavour of pizza');
+
+  // program.parse(process.argv);
+
+  // const options = program.opts();
+  // if (options.debug) console.log(options);
+  // console.log('pizza details:');
+  // if (options.small) console.log('- small pizza size');
+  // if (options.pizzaType) console.log(`- ${options.pizzaType}`);
+
+  // return;
+  const options = program.opts();
+
+  program.version(pkg.version).usage('<command> [options]');
+
+  program.option('-d, --debug', 'output extra debugging');
+
+  program.on('option:debug', () => {
+    if (options.debug) {
+      process.env.LOG_LEVEL = 'verbose';
+    } else {
+      process.env.LOG_LEVEL = 'info';
+    }
+    log.level = process.env.LOG_LEVEL;
+    log.verbose('已开启debug模式');
+  });
+
+  program.on('command:*', (obj) => {
+    const availableCommands = program.commands.map((item) => item.name());
+    console.log(colors.red(`未知命令：${obj[0]}，可用的命令 ${availableCommands.join(',')}`));
+  });
+
+  program
+    .command('init [projectName]')
+    .description('项目初始化')
+    .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
+    .action(init);
+
+  //   // 没有输入有效的命令；
+  //   program.outputHelp();
+
+  program.parse(process.argv);
+}
+
 async function core(params) {
   try {
-    checkPkgVersion();
-    checkNodeVersion();
-    checkRoot();
-    checkUserHome();
-    checkInputArgs();
-    checkEnv();
-    await checkGlobalUpdate();
+    // checkPkgVersion();
+    // checkNodeVersion();
+    // checkRoot();
+    // checkUserHome();
+    // checkInputArgs();
+    // checkEnv();
+    // await checkGlobalUpdate();
+    registerCommander();
   } catch (e) {
     log.error(e.message);
   }
