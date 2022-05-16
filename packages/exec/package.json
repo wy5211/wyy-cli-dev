@@ -1,0 +1,37 @@
+{
+  "name": "@wyy-cli-dev/exec",
+  "version": "1.0.2",
+  "description": "wyy-cli-dev command of  exec",
+  "keywords": [
+    "exec",
+    "cli",
+    "command"
+  ],
+  "author": "王阳 <wangyang@jiaogepengyou.com.cn>",
+  "homepage": "https://github.com/wy5211/wyy-cli-dev#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmmirror.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wy5211/wyy-cli-dev.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/wy5211/wyy-cli-dev/issues"
+  },
+  "dependencies": {
+    "@wyy-cli-dev/package": "file:../package"
+  }
+}

@@ -6,12 +6,11 @@ const userHome = require('user-home');
 const fs = require('fs');
 const { log, npm } = require('@wyy-cli-dev/utils');
 const init = require('@wyy-cli-dev/init');
+const exec = require('@wyy-cli-dev/exec');
 const pkg = require('../package.json');
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require('./const');
 
 const program = new Command();
-
-let config;
 
 async function checkGlobalUpdate() {
   // 1.获取npm包的历史版本；2.当前版本与历史最新版本进行对比；3.当前版本小于历史最新版本给出提示；
@@ -32,13 +31,13 @@ function createCliConfig() {
   if (process.env.CLI_HOME) {
     cliConfig.cliHome = path.join(userHome, process.env.CLI_HOME);
   } else {
+    process.env.CLI_HOME = DEFAULT_CLI_HOME;
     cliConfig.cliHome = path.join(userHome, DEFAULT_CLI_HOME);
   }
   return cliConfig;
 }
 
 function checkEnv() {
-  log.verbose('开始检查环境变量');
   // dotenv https://juejin.cn/post/6844904198929121288
   const dotenv = require('dotenv');
   dotenv.config({
@@ -49,25 +48,7 @@ function checkEnv() {
   //   dotenv.config({ path: path.resolve(userHome, '.env') }),
   //   process.env
   // );
-  config = createCliConfig(); // 准备基础配置
-  log.verbose('环境变量', config);
-}
-
-function checkArgs(args) {
-  if (args.debug) {
-    process.env.LOG_LEVEL = 'verbose';
-  } else {
-    process.env.LOG_LEVEL = 'info';
-  }
-  log.level = process.env.LOG_LEVEL;
-}
-
-function checkInputArgs() {
-  log.verbose('开始校验输入参数');
-  const minimist = require('minimist');
-  const args = minimist(process.argv.slice(2)); // 解析查询参数
-  checkArgs(args); // 校验参数
-  log.verbose('输入参数', args);
+  createCliConfig(); // 准备基础配置
 }
 
 function checkUserHome() {
@@ -98,27 +79,21 @@ function checkPkgVersion() {
 }
 
 function registerCommander() {
-  console.log('123');
-
-  // program
-  //   .option('-d, --debug', 'output extra debugging')
-  //   .option('-s, --small', 'small pizza size')
-  //   .option('-p, --pizza-type <type>', 'flavour of pizza');
-
-  // program.parse(process.argv);
-
-  // const options = program.opts();
-  // if (options.debug) console.log(options);
-  // console.log('pizza details:');
-  // if (options.small) console.log('- small pizza size');
-  // if (options.pizzaType) console.log(`- ${options.pizzaType}`);
-
-  // return;
   const options = program.opts();
 
-  program.version(pkg.version).usage('<command> [options]');
+  program
+    .name(Object.keys(pkg.bin)[0])
+    .usage('<command> [options]')
+    .version(pkg.version)
+    // 全局的
+    .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
+    .option('-d, --debug', '是否开启调试模式', false);
 
-  program.option('-d, --debug', 'output extra debugging');
+  program
+    .command('init [projectName]')
+    .description('项目初始化')
+    .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
+    .action(exec);
 
   program.on('option:debug', () => {
     if (options.debug) {
@@ -135,11 +110,10 @@ function registerCommander() {
     console.log(colors.red(`未知命令：${obj[0]}，可用的命令 ${availableCommands.join(',')}`));
   });
 
-  program
-    .command('init [projectName]')
-    .description('项目初始化')
-    .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
-    .action(init);
+  program.on('option:targetPath', (targetPath) => {
+    // console.log('wy->a', targetPath);
+    process.env.CLI_TARGET_PATH = targetPath;
+  });
 
   //   // 没有输入有效的命令；
   //   program.outputHelp();
@@ -147,15 +121,18 @@ function registerCommander() {
   program.parse(process.argv);
 }
 
+async function prepare() {
+  checkPkgVersion();
+  checkNodeVersion();
+  checkRoot();
+  checkUserHome();
+  checkEnv();
+  // await checkGlobalUpdate();
+}
+
 async function core(params) {
   try {
-    // checkPkgVersion();
-    // checkNodeVersion();
-    // checkRoot();
-    // checkUserHome();
-    // checkInputArgs();
-    // checkEnv();
-    // await checkGlobalUpdate();
+    prepare();
     registerCommander();
   } catch (e) {
     log.error(e.message);
@@ -163,3 +140,20 @@ async function core(params) {
 }
 
 module.exports = core;
+
+// function checkArgs(args) {
+//   if (args.debug) {
+//     process.env.LOG_LEVEL = 'verbose';
+//   } else {
+//     process.env.LOG_LEVEL = 'info';
+//   }
+//   log.level = process.env.LOG_LEVEL;
+// }
+
+// function checkInputArgs() {
+//   log.verbose('开始校验输入参数');
+//   const minimist = require('minimist');
+//   const args = minimist(process.argv.slice(2)); // 解析查询参数
+//   checkArgs(args); // 校验参数
+//   log.verbose('输入参数', args);
+// }

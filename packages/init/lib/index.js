@@ -1,6 +1,6 @@
-function init(projectName, opts) {
+function init(name, options, command) {
   // TODO
-  console.log(projectName, opts);
+  console.log('options', options, process.env.CLI_TARGET_PATH);
 }
 
 module.exports = init;

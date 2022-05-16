@@ -1,13 +1,9 @@
 const log = require('./log');
 const npm = require('./npm');
-
-function utils() {
-  // TODO
-  console.log('utils123');
-}
+const { isObject } = require('./utils');
 
 module.exports = {
-  utils,
+  isObject,
   log,
   npm,
 };
