@@ -3,17 +3,17 @@
 const Package = require('@wyy-cli-dev/package');
 
 module.exports = exec;
-function exec() {
-  const commandObj = arguments[arguments.length - 1];
-  console.log('commandObj', commandObj.targetPath);
+function exec(commandName, options, command) {
+  console.log('ooo', command.parent.opts());
+  const { targetPath } = options || {};
 
   const pkg = new Package({
     // package 的目标路径
-    // targetPath: commandObj.,
+    targetPath,
     // package 的缓存路径
     // storePath,
     // package 的name
-    // packageName,
+    packageName: commandName,
     // package 的version
     // packageVersion,
   });

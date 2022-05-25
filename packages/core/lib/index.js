@@ -1,7 +1,7 @@
 const path = require('path');
 const semver = require('semver');
 const colors = require('colors/safe');
-const { Command } = require('commander');
+const { program } = require('commander');
 const userHome = require('user-home');
 const fs = require('fs');
 const { log, npm } = require('@wyy-cli-dev/utils');
@@ -10,7 +10,7 @@ const exec = require('@wyy-cli-dev/exec');
 const pkg = require('../package.json');
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require('./const');
 
-const program = new Command();
+// const program = new Command();
 
 async function checkGlobalUpdate() {
   // 1.获取npm包的历史版本；2.当前版本与历史最新版本进行对比；3.当前版本小于历史最新版本给出提示；
@@ -84,16 +84,17 @@ function registerCommander() {
   program
     .name(Object.keys(pkg.bin)[0])
     .usage('<command> [options]')
-    .version(pkg.version)
-    // 全局的
-    .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
+    .version(`@wyy-cli-dev/cli ${pkg.version}`)
     .option('-d, --debug', '是否开启调试模式', false);
 
   program
-    .command('init [projectName]')
+    .command('init <projectName>')
     .description('项目初始化')
+    .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
     .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
-    .action(exec);
+    .action(async (command, { targetPath, force }) => {
+      await exec();
+    });
 
   program.on('option:debug', () => {
     if (options.debug) {
@@ -115,10 +116,10 @@ function registerCommander() {
     process.env.CLI_TARGET_PATH = targetPath;
   });
 
-  //   // 没有输入有效的命令；
-  //   program.outputHelp();
-
   program.parse(process.argv);
+
+  // const options = program.opts();
+  // console.log('options', options);
 }
 
 async function prepare() {
@@ -127,10 +128,11 @@ async function prepare() {
   checkRoot();
   checkUserHome();
   checkEnv();
+  // 开发注释提速
   // await checkGlobalUpdate();
 }
 
-async function core(params) {
+async function core() {
   try {
     prepare();
     registerCommander();
