@@ -34,6 +34,7 @@ function createCliConfig() {
     process.env.CLI_HOME = DEFAULT_CLI_HOME;
     cliConfig.cliHome = path.join(userHome, DEFAULT_CLI_HOME);
   }
+  process.env.CLI_HOME_PATH = cliConfig.cliHome;
   return cliConfig;
 }
 
@@ -85,16 +86,14 @@ function registerCommander() {
     .name(Object.keys(pkg.bin)[0])
     .usage('<command> [options]')
     .version(`@wyy-cli-dev/cli ${pkg.version}`)
+    .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
     .option('-d, --debug', '是否开启调试模式', false);
 
   program
     .command('init <projectName>')
     .description('项目初始化')
-    .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
     .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
-    .action(async (command, { targetPath, force }) => {
-      await exec();
-    });
+    .action(exec);
 
   program.on('option:debug', () => {
     if (options.debug) {
@@ -142,20 +141,3 @@ async function core() {
 }
 
 module.exports = core;
-
-// function checkArgs(args) {
-//   if (args.debug) {
-//     process.env.LOG_LEVEL = 'verbose';
-//   } else {
-//     process.env.LOG_LEVEL = 'info';
-//   }
-//   log.level = process.env.LOG_LEVEL;
-// }
-
-// function checkInputArgs() {
-//   log.verbose('开始校验输入参数');
-//   const minimist = require('minimist');
-//   const args = minimist(process.argv.slice(2)); // 解析查询参数
-//   checkArgs(args); // 校验参数
-//   log.verbose('输入参数', args);
-// }

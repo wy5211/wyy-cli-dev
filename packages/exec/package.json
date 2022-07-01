@@ -32,6 +32,7 @@
     "url": "https://github.com/wy5211/wyy-cli-dev/issues"
   },
   "dependencies": {
-    "@wyy-cli-dev/package": "file:../package"
+    "@wyy-cli-dev/package": "file:../package",
+    "@wyy-cli-dev/utils": "file:../utils"
   }
 }
