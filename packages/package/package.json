@@ -31,6 +31,9 @@
   },
   "dependencies": {
     "@wyy-cli-dev/utils": "file:../utils",
+    "fs-extra": "^10.1.0",
+    "npminstall": "^6.4.0",
+    "path-exists": "^4.0.0",
     "pkg-dir": "^5.0.0"
   }
 }

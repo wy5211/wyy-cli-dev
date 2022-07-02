@@ -28,6 +28,7 @@ async function getSemverVsersions(npmName, registry) {
   return versions;
 }
 
+// 根据指定 version 获取符合 semver 规范的最新版本号
 async function getNpmLastestSemverVersion(npmName, currentVersion, registry) {
   const versions = await getSemverVsersions(npmName, registry);
   const gtVsersions = versions
@@ -38,6 +39,22 @@ async function getNpmLastestSemverVersion(npmName, currentVersion, registry) {
   return gtVsersions[0];
 }
 
+// 获取最新的版本
+async function getLatestVersion(npmName, registry) {
+  let versions = await getSemverVsersions(npmName, registry);
+  if (versions) {
+    // versions = versions.sort((a, b) => {
+    //   return b - a;
+    // });
+    // console.log('versions23', versions);
+
+    return versions[versions.length - 1];
+  }
+  return null;
+}
+
 module.exports = {
+  getLatestVersion,
   getNpmLastestSemverVersion,
+  getNpmRegistry,
 };

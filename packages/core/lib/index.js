@@ -2,7 +2,7 @@ const path = require('path');
 const semver = require('semver');
 const colors = require('colors/safe');
 const { program } = require('commander');
-const userHome = require('user-home');
+const os = require('os');
 const fs = require('fs');
 const { log, npm } = require('@wyy-cli-dev/utils');
 const init = require('@wyy-cli-dev/init');
@@ -10,6 +10,7 @@ const exec = require('@wyy-cli-dev/exec');
 const pkg = require('../package.json');
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require('./const');
 
+const userHome = os.homedir();
 // const program = new Command();
 
 async function checkGlobalUpdate() {
@@ -35,7 +36,6 @@ function createCliConfig() {
     cliConfig.cliHome = path.join(userHome, DEFAULT_CLI_HOME);
   }
   process.env.CLI_HOME_PATH = cliConfig.cliHome;
-  return cliConfig;
 }
 
 function checkEnv() {
