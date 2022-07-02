@@ -43,12 +43,15 @@ async function getNpmLastestSemverVersion(npmName, currentVersion, registry) {
 async function getLatestVersion(npmName, registry) {
   let versions = await getSemverVsersions(npmName, registry);
   if (versions) {
-    // versions = versions.sort((a, b) => {
-    //   return b - a;
-    // });
+    versions = versions.sort((a, b) => {
+      if (semver.gt(b, a)) {
+        return 1;
+      }
+      return -1;
+    });
     // console.log('versions23', versions);
 
-    return versions[versions.length - 1];
+    return versions[0];
   }
   return null;
 }
