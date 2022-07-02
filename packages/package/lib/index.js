@@ -129,10 +129,11 @@ class Package {
     }
     if (this.storeDir) {
       // 第三方模块
-      getRootFile(this.cacheFilePath);
-    } else {
-      return getRootFile(this.targetPath);
+      return getRootFile(this.cacheFilePath);
     }
+
+    // 本地模块，targetPath
+    return getRootFile(this.targetPath);
   }
 }
 

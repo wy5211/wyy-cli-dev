@@ -18,5 +18,6 @@ module.exports = {
     'no-use-before-define': 0,
     'prefer-rest-params': 0,
     'import/no-dynamic-require': 0,
+    'object-curly-newline': 0,
   },
 };
