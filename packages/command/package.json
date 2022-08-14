@@ -1,13 +1,9 @@
 {
-  "name": "@wyy-cli-dev/init",
+  "name": "@wyy-cli-dev/command",
   "version": "1.0.2",
-  "description": "init ",
-  "keywords": [
-    "command",
-    "init"
-  ],
+  "description": "> TODO: description",
   "author": "wy5211 <1579151657@qq.com>",
-  "homepage": "",
+  "homepage": "https://github.com/wy5211/wyy-cli-dev#readme",
   "license": "ISC",
   "main": "lib/index.js",
   "directories": {
@@ -18,7 +14,7 @@
     "lib"
   ],
   "publishConfig": {
-    "registry": "https://registry.npmmirror.com/"
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -31,7 +27,8 @@
     "url": "https://github.com/wy5211/wyy-cli-dev/issues"
   },
   "dependencies": {
-    "@wyy-cli-dev/command": "file:../command",
+    "colors": "^1.4.0",
+    "semver": "^7.3.7",
     "@wyy-cli-dev/utils": "file:../utils"
   }
 }

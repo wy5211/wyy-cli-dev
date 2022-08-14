@@ -4,6 +4,7 @@ const Package = require('@wyy-cli-dev/package');
 const { log } = require('@wyy-cli-dev/utils');
 const os = require('os');
 const path = require('path');
+const cp = require('child_process');
 
 module.exports = exec;
 
@@ -22,6 +23,8 @@ async function exec() {
 
   const cmdObj = arguments[arguments.length - 1];
   const cmdName = cmdObj.name();
+
+  // console.log('opts', arguments[0], cmdObj.opts(), 'parentsOpts', cmdObj.parent.opts());
 
   const packageName = SETTINGS[cmdName];
   const packageVersion = 'latest';
@@ -63,6 +66,41 @@ async function exec() {
 
   const rootFile = pkg.getRootFilePath();
   if (rootFile) {
-    require(rootFile).apply(null, [...arguments]);
+    try {
+      const opts = {
+        ...arguments[1],
+        ...cmdObj.parent.opts(),
+      };
+
+      // console.log('opts', opts);
+
+      const code = `require('${rootFile}').apply(null, ${JSON.stringify([arguments[0], opts])})`;
+      const child = spawn('node', ['-e', code], {
+        cwd: process.cwd(),
+        stdio: 'inherit',
+      });
+
+      child.on('error', (e) => {
+        log.error(e.message);
+        process.exit(1);
+      });
+
+      child.on('exit', (e) => {
+        log.verbose('命令执行成功');
+        process.exit(e);
+      });
+    } catch (err) {
+      log.error(e.message);
+    }
   }
+}
+
+function spawn(command, args, options) {
+  // 兼容 windows
+  const win32 = process.platform === 'win32';
+
+  const cmd = win32 ? 'cmd' : command;
+  const cmdArgs = win32 ? ['/c'].concat(command, args) : args;
+
+  return cp.spawn(cmd, cmdArgs, options || {});
 }

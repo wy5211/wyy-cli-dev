@@ -49,7 +49,6 @@ async function getLatestVersion(npmName, registry) {
       }
       return -1;
     });
-    // console.log('versions23', versions);
 
     return versions[0];
   }

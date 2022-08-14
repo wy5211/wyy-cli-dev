@@ -5,13 +5,12 @@ const { program } = require('commander');
 const os = require('os');
 const fs = require('fs');
 const { log, npm } = require('@wyy-cli-dev/utils');
-const init = require('@wyy-cli-dev/init');
+// const init = require('@wyy-cli-dev/init');
 const exec = require('@wyy-cli-dev/exec');
 const pkg = require('../package.json');
-const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require('./const');
+const { DEFAULT_CLI_HOME, NPM_NAME } = require('./const');
 
 const userHome = os.homedir();
-// const program = new Command();
 
 async function checkGlobalUpdate() {
   // 1.获取npm包的历史版本；2.当前版本与历史最新版本进行对比；3.当前版本小于历史最新版本给出提示；
@@ -69,12 +68,6 @@ function checkRoot() {
   // console.log(process.getuid()); // -> 501
 }
 
-function checkNodeVersion() {
-  if (semver.gte(LOWEST_NODE_VERSION, process.version)) {
-    throw new Error(colors.red(`wyy-cli 需要安装 v${LOWEST_NODE_VERSION} 以上版本的 Node.js`));
-  }
-}
-
 function checkPkgVersion() {
   log.info('version', pkg.version);
 }
@@ -93,6 +86,7 @@ function registerCommander() {
     .command('init <projectName>')
     .description('项目初始化')
     .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
+    // 动态加载命令
     .action(exec);
 
   program.on('option:debug', () => {
@@ -116,14 +110,10 @@ function registerCommander() {
   });
 
   program.parse(process.argv);
-
-  // const options = program.opts();
-  // console.log('options', options);
 }
 
 async function prepare() {
   checkPkgVersion();
-  checkNodeVersion();
   checkRoot();
   checkUserHome();
   checkEnv();
