@@ -90,7 +90,7 @@ async function exec() {
         process.exit(e);
       });
     } catch (err) {
-      log.error(e.message);
+      log.error(err.message);
     }
   }
 }
