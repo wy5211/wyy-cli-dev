@@ -56,7 +56,7 @@ class Package {
     if (this.storeDir) {
       // 运行第三方模块的包是否存在
       await this.prepare();
-      console.log('this.cacheFilePath', this.cacheFilePath, pathExists(this.cacheFilePath));
+      // console.log('this.cacheFilePath', this.cacheFilePath, pathExists(this.cacheFilePath));
       return pathExists(this.cacheFilePath);
     }
     // 运行的本地模块是否存在
