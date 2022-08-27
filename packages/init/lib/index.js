@@ -4,6 +4,12 @@ const { log } = require('@wyy-cli-dev/utils');
 const fs = require('fs');
 const fse = require('fs-extra');
 const semver = require('semver');
+const path = require('path');
+const os = require('os');
+const getProjectTemplate = require('./getProjectTemplate');
+const Package = require('@wyy-cli-dev/package');
+
+const userHome = os.homedir();
 
 function isDirEmpty(localPath) {
   const fileList = fs.readdirSync(localPath);
@@ -28,15 +34,53 @@ class InitCommand extends Command {
   async exec() {
     try {
       // 1.准备阶段
-      await this.prepare();
+      const projectInfo = await this.prepare();
+      this.projectInfo = projectInfo;
+      log.verbose('projectInfo', projectInfo);
       // 2.下载模板
+      await this.downloadTemplate();
       // 3.安装模板
     } catch (err) {
       log.error(err.message);
     }
   }
 
+  async downloadTemplate() {
+    console.log('this.projectInfo', this.projectInfo, 'this.template', this.template);
+    const { projectTemplate } = this.projectInfo;
+    const choicedTemplateInfo = this.template.find((item) => item.npmName === projectTemplate);
+    const { npmName, version } = choicedTemplateInfo;
+    const targetPath = path.resolve(userHome, '.wyy-cli', 'template');
+    const storeDir = path.resolve(userHome, '.wyy-cli', 'template', 'node_modules');
+    const templateNpm = new Package({
+      targetPath,
+      storeDir,
+      packageName: npmName,
+      packageVersion: version,
+    });
+
+    if (!(await templateNpm.exists())) {
+      // 不存在，安装
+      templateNpm.install();
+    } else {
+      // 存在，更新
+      templateNpm.update();
+    }
+
+    // 1.通过项目模板API获取项目模板信息
+    // 1.1通过egg.js搭建一套后端系统
+    // 1.2通过npm存储项目模板
+    // 1.3将项目模板信息存储到mongodb数据库中
+    // 1.4通过egg.js获取mongodb中的数据并且通过API返回
+  }
+
   async prepare() {
+    // 0.判断项目模板是否存在
+    this.template = await getProjectTemplate();
+    if (!this.template && this.template?.length === 0) {
+      throw new Error('项目模板不存在');
+    }
+    console.log(this.template);
     const localPath = process.cwd();
     // 1.判断当前目录是否为空
     if (!isDirEmpty(localPath)) {
@@ -94,7 +138,7 @@ class InitCommand extends Command {
 
     // 2.获取项目基本信息
     if (type === TYPE_PROJECT) {
-      const o = await inquirer.prompt([
+      const projectInfo = await inquirer.prompt([
         {
           name: 'projectName',
           type: 'input',
@@ -145,9 +189,26 @@ class InitCommand extends Command {
             return v;
           },
         },
+        {
+          type: 'list',
+          name: 'projectTemplate',
+          message: '请选择项目模板',
+          choices: this.createTemplateChoice(this.template),
+        },
       ]);
-      console.log(o);
+      // console.log(projectInfo);
+      return {
+        ...projectInfo,
+        type,
+      };
     }
+  }
+
+  createTemplateChoice(list) {
+    return list.map((item) => ({
+      value: item.npmName,
+      name: item.name,
+    }));
   }
 }
 

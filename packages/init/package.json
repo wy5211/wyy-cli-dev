@@ -33,6 +33,7 @@
   "dependencies": {
     "@wyy-cli-dev/command": "file:../command",
     "@wyy-cli-dev/utils": "file:../utils",
+    "@wyy-cli-dev/package": "file:../package",
     "fs-extra": "^10.1.0",
     "inquirer": "^7.3.3",
     "semver": "^7.3.7"
