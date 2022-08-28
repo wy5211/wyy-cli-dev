@@ -11,6 +11,9 @@ const getProjectTemplate = require('./getProjectTemplate');
 
 const userHome = os.homedir();
 
+const TEMPLATE_TYPE_NORMAL = 'normal';
+const TEMPLATE_TYPE_CUSTOM = 'custom';
+
 function isDirEmpty(localPath) {
   const fileList = fs.readdirSync(localPath);
   const validFileList = fileList.filter((item) => {
@@ -40,15 +43,57 @@ class InitCommand extends Command {
       // 2.下载模板
       await this.downloadTemplate();
       // 3.安装模板
+      await this.installTemplate();
     } catch (err) {
       log.error(err.message);
     }
+  }
+
+  async installTemplate() {
+    log.verbose('this.choicedTemplateInfo', this.choicedTemplateInfo);
+    if (!this.choicedTemplateInfo) {
+      throw new Error('无法识别项目模板类型');
+    }
+    if (!this.choicedTemplateInfo.type) {
+      this.choicedTemplateInfo.type = TEMPLATE_TYPE_NORMAL;
+    }
+    if (this.choicedTemplateInfo.type === TEMPLATE_TYPE_NORMAL) {
+      await this.installNormalTemplate();
+      return;
+    }
+    if (this.choicedTemplateInfo.type === TEMPLATE_TYPE_CUSTOM) {
+      await this.installCustomTemplate();
+      return;
+    }
+    throw new Error('项目模板类型不存在');
+  }
+
+  installNormalTemplate() {
+    const spinner = spinnerStart('正在安装模板...');
+
+    try {
+      const templatePath = path.resolve(this.templateNpm.cacheFilePath, 'template');
+      const targetPath = process.cwd();
+      fse.ensureDirSync(templatePath);
+      fse.ensureDirSync(targetPath);
+      fse.copySync(templatePath, targetPath);
+    } catch (e) {
+      throw e;
+    } finally {
+      spinner.stop(true);
+    }
+  }
+
+  installCustomTemplate() {
+    console.log('custom template');
   }
 
   async downloadTemplate() {
     // console.log('this.projectInfo', this.projectInfo, 'this.template', this.template);
     const { projectTemplate } = this.projectInfo;
     const choicedTemplateInfo = this.template.find((item) => item.npmName === projectTemplate);
+    this.choicedTemplateInfo = choicedTemplateInfo;
+
     const { npmName, version } = choicedTemplateInfo;
     const targetPath = path.resolve(userHome, '.wyy-cli', 'template');
     const storeDir = path.resolve(userHome, '.wyy-cli', 'template', 'node_modules');
@@ -58,24 +103,30 @@ class InitCommand extends Command {
       packageName: npmName,
       packageVersion: version,
     });
+    this.templateNpm = templateNpm;
 
     if (!(await templateNpm.exists())) {
-      const spinner = spinnerStart('正在下载模板...');
       try {
+        const spinner = spinnerStart('正在下载模板...');
+        await sleep(1000);
         // 不存在，安装
         await templateNpm.install();
-        log.success('下载模板成功');
+        spinner.stop(true);
       } catch (e) {
         throw e;
       } finally {
-        spinner.stop(true);
+        if (await templateNpm.exists()) {
+          log.success('下载模板成功');
+        }
       }
     } else {
-      const spinner = spinnerStart('正在更新模板...');
       // 存在，更新
       await templateNpm.update();
-      spinner.stop(true);
-      log.success('更新模板成功');
+      // const spinner = spinnerStart('正在更新模板...');
+      // spinner.stop(true);
+      if (await templateNpm.exists()) {
+        log.success('更新模板成功');
+      }
     }
 
     // 1.通过项目模板API获取项目模板信息
@@ -128,7 +179,7 @@ class InitCommand extends Command {
   }
 
   async getProjectInfo() {
-    // 1.选择创建项目/组建
+    // 1.选择创建项目/组件
     const { type } = await inquirer.prompt({
       name: 'type',
       type: 'list',
