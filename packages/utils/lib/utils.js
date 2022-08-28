@@ -1,9 +1,25 @@
 const path = require('path');
+const Spinner = require('cli-spinner').Spinner;
 
 module.exports = {
+  sleep,
   isObject,
   formatPath,
+  spinnerStart,
 };
+
+function spinnerStart(msg = 'loading', spinnerString = '|/-\\') {
+  const spinner = new Spinner(`${msg} %s`);
+  spinner.setSpinnerString(spinnerString);
+  spinner.start();
+  return spinner;
+}
+
+function sleep(timeout) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+}
 
 function isObject(val) {
   return Object.prototype.toString.call(val) === '[object Object]';

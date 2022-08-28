@@ -1,13 +1,13 @@
 const inquirer = require('inquirer');
 const Command = require('@wyy-cli-dev/command');
-const { log } = require('@wyy-cli-dev/utils');
+const { log, spinnerStart, sleep } = require('@wyy-cli-dev/utils');
 const fs = require('fs');
 const fse = require('fs-extra');
 const semver = require('semver');
 const path = require('path');
 const os = require('os');
-const getProjectTemplate = require('./getProjectTemplate');
 const Package = require('@wyy-cli-dev/package');
+const getProjectTemplate = require('./getProjectTemplate');
 
 const userHome = os.homedir();
 
@@ -46,7 +46,7 @@ class InitCommand extends Command {
   }
 
   async downloadTemplate() {
-    console.log('this.projectInfo', this.projectInfo, 'this.template', this.template);
+    // console.log('this.projectInfo', this.projectInfo, 'this.template', this.template);
     const { projectTemplate } = this.projectInfo;
     const choicedTemplateInfo = this.template.find((item) => item.npmName === projectTemplate);
     const { npmName, version } = choicedTemplateInfo;
@@ -60,11 +60,22 @@ class InitCommand extends Command {
     });
 
     if (!(await templateNpm.exists())) {
-      // 不存在，安装
-      templateNpm.install();
+      const spinner = spinnerStart('正在下载模板...');
+      try {
+        // 不存在，安装
+        await templateNpm.install();
+        log.success('下载模板成功');
+      } catch (e) {
+        throw e;
+      } finally {
+        spinner.stop(true);
+      }
     } else {
+      const spinner = spinnerStart('正在更新模板...');
       // 存在，更新
-      templateNpm.update();
+      await templateNpm.update();
+      spinner.stop(true);
+      log.success('更新模板成功');
     }
 
     // 1.通过项目模板API获取项目模板信息
@@ -80,7 +91,7 @@ class InitCommand extends Command {
     if (!this.template && this.template?.length === 0) {
       throw new Error('项目模板不存在');
     }
-    console.log(this.template);
+    // console.log(this.template);
     const localPath = process.cwd();
     // 1.判断当前目录是否为空
     if (!isDirEmpty(localPath)) {
@@ -169,7 +180,7 @@ class InitCommand extends Command {
           name: 'projectVersion',
           type: 'input',
           message: '请输入项目版本',
-          default: '',
+          default: '1.0.0',
           validate(v) {
             const isValid = !!semver.valid(v);
             const done = this.async();
