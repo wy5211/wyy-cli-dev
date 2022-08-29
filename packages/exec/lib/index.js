@@ -6,16 +6,17 @@ const os = require('os');
 const path = require('path');
 const cp = require('child_process');
 
-module.exports = exec;
-
 const SETTINGS = {
+  // 需要是发布到 npm 上的包
   init: '@imooc-cli/init',
   // init: 'foo',
 };
+const userHome = os.homedir();
 
 const CACHE_DIR = 'dependencies';
 
 async function exec() {
+  // 是否指定本地调试文件
   let targetPath = process.env.CLI_TARGET_PATH;
   let storeDir = '';
   let pkg;
@@ -32,7 +33,7 @@ async function exec() {
   // 未指定 targetPath，动态加载npm模块命令去执行
   if (!targetPath) {
     // 生成缓存路径
-    targetPath = path.resolve(os.homedir(), homePath, CACHE_DIR);
+    targetPath = path.resolve(userHome, homePath, CACHE_DIR);
     storeDir = path.resolve(targetPath, 'node_modules');
     log.verbose('targetPath', targetPath);
     log.verbose('storeDir', storeDir);
@@ -104,3 +105,5 @@ function spawn(command, args, options) {
 
   return cp.spawn(cmd, cmdArgs, options || {});
 }
+
+module.exports = exec;

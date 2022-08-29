@@ -22,6 +22,7 @@ class Package {
       packageName,
       // package 的version
       packageVersion,
+      // 缓存路径
       storeDir,
     } = options || {};
     this.targetPath = targetPath;

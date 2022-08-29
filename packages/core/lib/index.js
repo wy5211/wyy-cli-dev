@@ -39,9 +39,10 @@ function createCliConfig() {
 
 function checkEnv() {
   // dotenv https://juejin.cn/post/6844904198929121288
+  // 可以把环境变量中的变量从 .env 文件中加载到 process.env 中
   const dotenv = require('dotenv');
   dotenv.config({
-    path: path.resolve(userHome),
+    path: path.resolve(userHome, '.env'),
   });
   // console.log(
   //   'dotenv',
@@ -78,7 +79,7 @@ function registerCommander() {
   program
     .name(Object.keys(pkg.bin)[0])
     .usage('<command> [options]')
-    .version(`@wyy-cli-dev/cli ${pkg.version}`)
+    .version(`@wyy-cli-dev/core ${pkg.version}`)
     .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
     .option('-d, --debug', '是否开启调试模式', false);
 
@@ -105,7 +106,7 @@ function registerCommander() {
   });
 
   program.on('option:targetPath', (targetPath) => {
-    // console.log('wy->a', targetPath);
+    // console.log('wy->targetPath', targetPath);
     process.env.CLI_TARGET_PATH = targetPath;
   });
 
@@ -118,7 +119,7 @@ async function prepare() {
   checkUserHome();
   checkEnv();
   // 开发注释提速
-  // await checkGlobalUpdate();
+  await checkGlobalUpdate();
 }
 
 async function core() {

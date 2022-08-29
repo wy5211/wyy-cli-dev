@@ -107,11 +107,10 @@ class InitCommand extends Command {
 
     if (!(await templateNpm.exists())) {
       try {
-        const spinner = spinnerStart('正在下载模板...');
-        await sleep(1000);
+        // const spinner = spinnerStart('正在下载模板...');
         // 不存在，安装
         await templateNpm.install();
-        spinner.stop(true);
+        // spinner.stop(true);
       } catch (e) {
         throw e;
       } finally {

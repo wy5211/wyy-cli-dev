@@ -1,5 +1,5 @@
 const path = require('path');
-const Spinner = require('cli-spinner').Spinner;
+const { Spinner } = require('cli-spinner');
 
 module.exports = {
   sleep,

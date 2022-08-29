@@ -13,14 +13,7 @@ function getProjectTemplate() {
       name: '管理后台模板-vue',
       version: '1.0.0',
       // 自定义模板
-      type: 'custom',
-    },
-    {
-      npmName: 'antd',
-      name: 'antd',
-      version: '3.x',
-      // 自定义模板
-      type: 'custom',
+      type: 'normal',
     },
   ];
 }
