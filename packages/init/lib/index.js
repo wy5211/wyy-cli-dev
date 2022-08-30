@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const Command = require('@wyy-cli-dev/command');
-const { log, spinnerStart, sleep } = require('@wyy-cli-dev/utils');
+const { log, spinnerStart, execAsync } = require('@wyy-cli-dev/utils');
 const fs = require('fs');
 const fse = require('fs-extra');
 const semver = require('semver');
@@ -68,7 +68,7 @@ class InitCommand extends Command {
     throw new Error('项目模板类型不存在');
   }
 
-  installNormalTemplate() {
+  async installNormalTemplate() {
     const spinner = spinnerStart('正在安装模板...');
 
     try {
@@ -81,6 +81,23 @@ class InitCommand extends Command {
       throw e;
     } finally {
       spinner.stop(true);
+    }
+
+    // 执行命令
+
+    let installRet;
+    const { installCommand, startCommand } = this.choicedTemplateInfo;
+    if (installCommand) {
+      const installCmd = installCommand.split(' ');
+      const cmd = installCmd[0];
+      const args = installCmd.slice(1);
+      installRet = await execAsync(cmd, args, {
+        stdio: 'inherit',
+        cwd: process.cwd(),
+      });
+      if (installRet !== 0) {
+        throw new Error('依赖安装过程失败');
+      }
     }
   }
 
@@ -107,10 +124,10 @@ class InitCommand extends Command {
 
     if (!(await templateNpm.exists())) {
       try {
-        // const spinner = spinnerStart('正在下载模板...');
+        const spinner = spinnerStart('正在下载模板...');
         // 不存在，安装
         await templateNpm.install();
-        // spinner.stop(true);
+        spinner.stop(true);
       } catch (e) {
         throw e;
       } finally {
@@ -120,9 +137,9 @@ class InitCommand extends Command {
       }
     } else {
       // 存在，更新
+      const spinner = spinnerStart('正在更新模板...');
       await templateNpm.update();
-      // const spinner = spinnerStart('正在更新模板...');
-      // spinner.stop(true);
+      spinner.stop(true);
       if (await templateNpm.exists()) {
         log.success('更新模板成功');
       }
@@ -145,6 +162,7 @@ class InitCommand extends Command {
     const localPath = process.cwd();
     // 1.判断当前目录是否为空
     if (!isDirEmpty(localPath)) {
+      // 1.1当前目录不为空
       let ifContinue = false;
       if (!this.force) {
         // 1.1询问是否继续创建
@@ -155,7 +173,7 @@ class InitCommand extends Command {
           message: '当前文件夹不为空，是否继续创建',
         });
         if (!continueVal) {
-          return;
+          process.exit(1);
         }
         ifContinue = continueVal;
       }
@@ -171,9 +189,12 @@ class InitCommand extends Command {
         });
         if (confirmDelete) {
           fse.emptyDirSync(localPath);
+          return this.getProjectInfo();
         }
+        process.exit(1);
       }
     }
+    // 当前目录为空
     return this.getProjectInfo();
   }
 

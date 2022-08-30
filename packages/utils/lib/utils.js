@@ -6,6 +6,8 @@ module.exports = {
   isObject,
   formatPath,
   spinnerStart,
+  exec,
+  execAsync,
 };
 
 function spinnerStart(msg = 'loading', spinnerString = '|/-\\') {
@@ -35,4 +37,27 @@ function formatPath(pathUrl) {
     return pathUrl;
   }
   return pathUrl.replace(/\\/g, '/');
+}
+
+function exec(command, args, options) {
+  // 兼容 windows
+  const win32 = process.platform === 'win32';
+
+  const cmd = win32 ? 'cmd' : command;
+  const cmdArgs = win32 ? ['/c'].concat(command, args) : args;
+
+  return require('child_process').spawn(cmd, cmdArgs, options || {});
+}
+
+function execAsync(command, args, options) {
+  return new Promise((resolve, reject) => {
+    const child = exec(command, args, options);
+    child.on('error', (e) => {
+      reject(e);
+    });
+
+    child.on('exit', (e) => {
+      resolve(e);
+    });
+  });
 }

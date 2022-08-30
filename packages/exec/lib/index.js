@@ -1,10 +1,9 @@
 'use strict';
 
 const Package = require('@wyy-cli-dev/package');
-const { log } = require('@wyy-cli-dev/utils');
+const { log, exec: spawn } = require('@wyy-cli-dev/utils');
 const os = require('os');
 const path = require('path');
-const cp = require('child_process');
 
 const SETTINGS = {
   // 需要是发布到 npm 上的包
@@ -94,16 +93,6 @@ async function exec() {
       log.error(err.message);
     }
   }
-}
-
-function spawn(command, args, options) {
-  // 兼容 windows
-  const win32 = process.platform === 'win32';
-
-  const cmd = win32 ? 'cmd' : command;
-  const cmdArgs = win32 ? ['/c'].concat(command, args) : args;
-
-  return cp.spawn(cmd, cmdArgs, options || {});
 }
 
 module.exports = exec;

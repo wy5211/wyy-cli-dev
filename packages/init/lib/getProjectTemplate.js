@@ -7,6 +7,8 @@ function getProjectTemplate() {
       version: '1.0.0',
       // 标准模板
       type: 'normal',
+      installCommand: 'npm install',
+      startCommand: 'npm start',
     },
     {
       npmName: 'imooc-cli-dev-template-vue-element-admin',
@@ -14,6 +16,8 @@ function getProjectTemplate() {
       version: '1.0.0',
       // 自定义模板
       type: 'normal',
+      installCommand: 'npm install',
+      startCommand: 'npm start',
     },
   ];
 }

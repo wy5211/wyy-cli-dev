@@ -1,6 +1,6 @@
 const log = require('./log');
 const npm = require('./npm');
-const { isObject, formatPath, spinnerStart, sleep } = require('./utils');
+const { isObject, formatPath, spinnerStart, sleep, exec, execAsync } = require('./utils');
 
 module.exports = {
   sleep,
@@ -9,4 +9,6 @@ module.exports = {
   isObject,
   log,
   npm,
+  exec,
+  execAsync,
 };
