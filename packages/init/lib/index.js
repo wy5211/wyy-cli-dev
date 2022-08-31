@@ -6,6 +6,8 @@ const fse = require('fs-extra');
 const semver = require('semver');
 const path = require('path');
 const os = require('os');
+const ejs = require('ejs');
+const glob = require('glob');
 const Package = require('@wyy-cli-dev/package');
 const getProjectTemplate = require('./getProjectTemplate');
 
@@ -13,6 +15,8 @@ const userHome = os.homedir();
 
 const TEMPLATE_TYPE_NORMAL = 'normal';
 const TEMPLATE_TYPE_CUSTOM = 'custom';
+
+const WHITE_COMMAND_LIST = ['npm', 'cnpm', 'yarn'];
 
 function isDirEmpty(localPath) {
   const fileList = fs.readdirSync(localPath);
@@ -68,6 +72,34 @@ class InitCommand extends Command {
     throw new Error('项目模板类型不存在');
   }
 
+  checkCommand(cmd) {
+    if (WHITE_COMMAND_LIST.includes(cmd)) {
+      return cmd;
+    }
+    return null;
+  }
+
+  async execCommand(command, errMsg) {
+    if (!command) {
+      return null;
+    }
+
+    const cmdArr = command.split(' ');
+    const cmd = this.checkCommand(cmdArr[0]);
+    if (!cmd) {
+      throw new Error(`命令不存在，命令：${command}`);
+    }
+    const args = cmdArr.slice(1);
+    const result = await execAsync(cmd, args, {
+      stdio: 'inherit',
+      cwd: process.cwd(),
+    });
+    if (result !== 0) {
+      throw new Error(errMsg);
+    }
+    return result;
+  }
+
   async installNormalTemplate() {
     const spinner = spinnerStart('正在安装模板...');
 
@@ -82,27 +114,59 @@ class InitCommand extends Command {
     } finally {
       spinner.stop(true);
     }
+    const ignore = ['node_modules/**', '**/*.ico', '**/*.css', 'public/**'];
+    this.ejsRender({ ignore });
 
     // 执行命令
+    // const { installCommand, startCommand } = this.choicedTemplateInfo;
+    // await this.execCommand(installCommand, '依赖安装过程失败');
 
-    let installRet;
-    const { installCommand, startCommand } = this.choicedTemplateInfo;
-    if (installCommand) {
-      const installCmd = installCommand.split(' ');
-      const cmd = installCmd[0];
-      const args = installCmd.slice(1);
-      installRet = await execAsync(cmd, args, {
-        stdio: 'inherit',
-        cwd: process.cwd(),
-      });
-      if (installRet !== 0) {
-        throw new Error('依赖安装过程失败');
-      }
-    }
+    // await this.execCommand(startCommand, '启动失败');
   }
 
   installCustomTemplate() {
     console.log('custom template');
+  }
+
+  ejsRender(options) {
+    const dir = process.cwd();
+    return new Promise((resolve, reject) => {
+      glob(
+        '**',
+        {
+          cwd: dir,
+          ignore: options.ignore,
+          nodir: true,
+        },
+        (err, files) => {
+          if (err) {
+            reject(err);
+          }
+          Promise.all(
+            files.map((file) => {
+              const filePath = path.join(dir, file);
+              return new Promise((resolve1, reject1) => {
+                const { className, projectVersion } = this.projectInfo;
+                ejs.renderFile(filePath, { className, version: projectVersion }, {}, (e, res) => {
+                  if (err) {
+                    reject1(e);
+                  } else {
+                    fse.writeFileSync(filePath, res);
+                    resolve1(res);
+                  }
+                });
+              });
+            }),
+          )
+            .then(() => {
+              resolve();
+            })
+            .catch((e) => {
+              reject(e);
+            });
+        },
+      );
+    });
   }
 
   async downloadTemplate() {
@@ -120,7 +184,6 @@ class InitCommand extends Command {
       packageName: npmName,
       packageVersion: version,
     });
-    this.templateNpm = templateNpm;
 
     if (!(await templateNpm.exists())) {
       try {
@@ -144,6 +207,8 @@ class InitCommand extends Command {
         log.success('更新模板成功');
       }
     }
+    this.templateNpm = templateNpm;
+    log.verbose('templateNpm', templateNpm);
 
     // 1.通过项目模板API获取项目模板信息
     // 1.1通过egg.js搭建一套后端系统
@@ -279,6 +344,9 @@ class InitCommand extends Command {
         },
       ]);
       // console.log(projectInfo);
+      if (projectInfo.projectName) {
+        projectInfo.className = require('kebab-case')(projectInfo.projectName).replace(/^-/, '');
+      }
       return {
         ...projectInfo,
         type,

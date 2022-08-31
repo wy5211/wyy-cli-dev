@@ -32,10 +32,13 @@
   },
   "dependencies": {
     "@wyy-cli-dev/command": "file:../command",
-    "@wyy-cli-dev/utils": "file:../utils",
     "@wyy-cli-dev/package": "file:../package",
+    "@wyy-cli-dev/utils": "file:../utils",
+    "ejs": "^3.1.8",
     "fs-extra": "^10.1.0",
+    "glob": "^8.0.3",
     "inquirer": "^7.3.3",
+    "kebab-case": "^1.0.1",
     "semver": "^7.3.7"
   }
 }

@@ -106,6 +106,7 @@ class Package {
       this.packageVersion = latestPackageVersion;
       return true;
     }
+    this.packageVersion = latestPackageVersion;
     return false;
   }
 
