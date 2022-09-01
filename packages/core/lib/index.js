@@ -84,7 +84,7 @@ function registerCommander() {
     .option('-d, --debug', '是否开启调试模式', false);
 
   program
-    .command('init <projectName>')
+    .command('init [projectName]')
     .description('项目初始化')
     .option('-f, --force', '覆盖当前路径文件（谨慎使用）')
     // 动态加载命令

@@ -283,25 +283,20 @@ class InitCommand extends Command {
     });
     log.verbose('type', type);
 
-    // 2.获取项目基本信息
-    if (type === TYPE_PROJECT) {
-      const projectInfo = await inquirer.prompt([
+    let inquirerList = [];
+
+    if (!isValidProjectName(this.projectName)) {
+      inquirerList = [
         {
           name: 'projectName',
           type: 'input',
           message: '请输入项目名称',
           default: '',
           validate(v) {
-            // 1.输入的首字符必须为英文字符
-            // 2.尾字符必须为英文或数字
-            // 合法：a, a-b, a_b, a-b-c, a_b_c, a-b1-c1, z_b1_c1
-            // 不合法：1， a-, a_, a-1, a_1
-            const reg = /^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/;
-
             const done = this.async();
 
             setTimeout(() => {
-              if (!reg.test(v)) {
+              if (!isValidProjectName(v)) {
                 done('请输入合法的项目名');
                 return;
               }
@@ -312,37 +307,45 @@ class InitCommand extends Command {
             return v;
           },
         },
-        {
-          name: 'projectVersion',
-          type: 'input',
-          message: '请输入项目版本',
-          default: '1.0.0',
-          validate(v) {
-            const isValid = !!semver.valid(v);
-            const done = this.async();
-            setTimeout(() => {
-              if (!isValid) {
-                done('请输入合法的版本号');
-                return;
+      ];
+    }
+
+    // 2.获取项目基本信息
+    if (type === TYPE_PROJECT) {
+      const projectInfo = await inquirer.prompt(
+        inquirerList.concat([
+          {
+            name: 'projectVersion',
+            type: 'input',
+            message: '请输入项目版本',
+            default: '1.0.0',
+            validate(v) {
+              const isValid = !!semver.valid(v);
+              const done = this.async();
+              setTimeout(() => {
+                if (!isValid) {
+                  done('请输入合法的版本号');
+                  return;
+                }
+                done(null, true);
+              }, 0);
+            },
+            filter(v) {
+              const val = semver.valid(v);
+              if (!!val) {
+                return val;
               }
-              done(null, true);
-            }, 0);
+              return v;
+            },
           },
-          filter(v) {
-            const val = semver.valid(v);
-            if (!!val) {
-              return val;
-            }
-            return v;
+          {
+            type: 'list',
+            name: 'projectTemplate',
+            message: '请选择项目模板',
+            choices: createTemplateChoice(this.template),
           },
-        },
-        {
-          type: 'list',
-          name: 'projectTemplate',
-          message: '请选择项目模板',
-          choices: this.createTemplateChoice(this.template),
-        },
-      ]);
+        ]),
+      );
       // console.log(projectInfo);
       if (projectInfo.projectName) {
         projectInfo.className = require('kebab-case')(projectInfo.projectName).replace(/^-/, '');
@@ -353,13 +356,23 @@ class InitCommand extends Command {
       };
     }
   }
+}
 
-  createTemplateChoice(list) {
-    return list.map((item) => ({
-      value: item.npmName,
-      name: item.name,
-    }));
-  }
+function createTemplateChoice(list) {
+  return list.map((item) => ({
+    value: item.npmName,
+    name: item.name,
+  }));
+}
+
+function isValidProjectName(v) {
+  // 1.输入的首字符必须为英文字符
+  // 2.尾字符必须为英文或数字
+  // 合法：a, a-b, a_b, a-b-c, a_b_c, a-b1-c1, z_b1_c1
+  // 不合法：1， a-, a_, a-1, a_1
+  const reg = /^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/;
+
+  return reg.test(v);
 }
 
 function init() {
